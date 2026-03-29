@@ -1,0 +1,10 @@
+{
+  "name": "parfume-reseller-workspace",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces"
+  }
+}

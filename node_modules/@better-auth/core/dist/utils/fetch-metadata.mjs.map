@@ -1,0 +1,1 @@
+{"version":3,"file":"fetch-metadata.mjs","names":[],"sources":["../../src/utils/fetch-metadata.ts"],"sourcesContent":["export function isBrowserFetchRequest(headers?: Headers | null): boolean {\n\treturn headers?.get(\"sec-fetch-mode\") === \"cors\";\n}\n"],"mappings":";AAAA,SAAgB,sBAAsB,SAAmC;AACxE,QAAO,SAAS,IAAI,iBAAiB,KAAK"}
