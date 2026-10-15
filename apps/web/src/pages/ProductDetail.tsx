@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
+import { motion } from 'framer-motion';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -63,14 +64,25 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 pt-12 pb-32">
-      <Link to="/" className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors mb-10 group">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-7xl mx-auto px-6 pt-12 pb-32"
+    >
+      <Link to="/collections" className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors mb-10 group">
         <span className="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
         <span className="font-medium tracking-wide">Kembali ke Katalog</span>
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-        <div className="lg:col-span-7 space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="lg:col-span-7 space-y-6"
+        >
           <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-surface-container border border-outline-variant/20 shadow-2xl">
             <div 
               ref={scrollRef} 
@@ -103,9 +115,14 @@ export default function ProductDetail() {
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        <div className="lg:col-span-5 flex flex-col gap-10">
+        <motion.div 
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="lg:col-span-5 flex flex-col gap-10"
+        >
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-primary font-headline font-bold text-xl tracking-widest">{product.brand}</h2>
@@ -184,10 +201,16 @@ export default function ProductDetail() {
               <span className="text-[10px] text-on-surface-variant mt-2 block">Radius 2 Meter</span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      <section className="mt-32">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.7 }}
+        className="mt-32"
+      >
         <h3 className="text-3xl font-headline font-bold mb-12 text-center text-white">Fragrance Profile</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="glass-card p-10 rounded-3xl border border-outline-variant/20 relative overflow-hidden group">
@@ -229,9 +252,15 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="mt-32 border-t border-outline-variant/20 pt-20">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.7 }}
+        className="mt-32 border-t border-outline-variant/20 pt-20"
+      >
         <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
           <div>
             <h3 className="text-3xl font-headline font-bold text-white mb-2">Suara Pelanggan</h3>
@@ -287,7 +316,7 @@ export default function ProductDetail() {
             <p className="text-on-surface-variant italic leading-relaxed">"Wanginya sangat versatile, bisa dipakai siang maupun malam. Versi EDP ini jauh lebih smooth dibanding EDT-nya. Sangat worth the price!"</p>
           </div>
         </div>
-      </section>
-    </div>
+      </motion.section>
+    </motion.div>
   );
 }

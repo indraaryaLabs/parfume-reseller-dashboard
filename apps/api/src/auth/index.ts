@@ -10,6 +10,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: 6,
   },
   socialProviders: {
     google: {
@@ -17,5 +18,10 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     },
   },
-  trustedOrigins: [process.env.FRONTEND_URL || 'http://localhost:5173'],
+  trustedOrigins: [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+  ],
 });
+

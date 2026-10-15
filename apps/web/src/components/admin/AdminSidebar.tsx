@@ -1,4 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useStore } from '../../context/StoreContext';
 
 const navItems = [
   { path: '/admin', icon: 'dashboard', label: 'Dashboard' },
@@ -10,6 +11,13 @@ const navItems = [
 
 export default function AdminSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useStore();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <aside className="h-screen w-64 fixed left-0 top-0 border-r border-[#353534]/30 bg-[#201F1F]/80 backdrop-blur-xl flex flex-col py-6 shadow-[20px_0_40px_rgba(201,168,76,0.04)] z-50">
@@ -38,7 +46,8 @@ export default function AdminSidebar() {
           );
         })}
       </nav>
-      <div className="px-6 mt-auto pt-6 border-t border-outline-variant/20 flex flex-col gap-6">
+      <div className="px-2 mt-auto pt-6 border-t border-outline-variant/20 flex flex-col gap-2">
+        {/* Settings */}
         <Link
           to="/admin/settings"
           className={
@@ -52,17 +61,33 @@ export default function AdminSidebar() {
           </span>
           <span>Settings</span>
         </Link>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-primary/30 shrink-0">
-            <img
-              alt="Admin Avatar"
-              className="w-full h-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3p0DhYKmbfMzdKCGn9tKVv-uH-K67gCr2jxIOAmHAZgiiZMUwfl2LwAEOGodkO30sZHA2qMbdNWsm1HPv7UXbHt9hc7aOxMbNpJELjXO-M7O7-pJpNn-wJMGSVRyRkMY7WR9ym7ObUrqyUl3k_AZ4AjVvz8qCHamr8Eum63FnBiw1SlLOUqIpyOGKAxg2YsqnOlRZvBqOeKxq9ASnB9VY3yy1ESwu6uqag2lN93RImlaf-PpcZxr_bHK4rD29u7pkAO5R_FOlXsoQ"
-            />
+
+        {/* Switch to Consumer */}
+        <Link
+          to="/"
+          className="flex items-center gap-3 px-4 py-3 text-[#FFB1C0] hover:text-[#FFB1C0] hover:bg-[#FFB1C0]/10 hover:scale-[1.02] transition-all duration-300 font-headline tracking-tight text-sm font-semibold rounded-lg"
+        >
+          <span className="material-symbols-outlined">storefront</span>
+          <span>Lihat Toko</span>
+        </Link>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 hover:scale-[1.02] transition-all duration-300 font-headline tracking-tight text-sm font-semibold rounded-lg w-full text-left cursor-pointer"
+        >
+          <span className="material-symbols-outlined">logout</span>
+          <span>Logout</span>
+        </button>
+
+        {/* User info */}
+        <div className="flex items-center gap-3 px-4 pt-4 mt-2 border-t border-outline-variant/20">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-on-primary text-sm font-bold shrink-0">
+            {user?.name?.charAt(0)?.toUpperCase() || 'A'}
           </div>
           <div className="overflow-hidden">
-            <p className="text-sm font-bold text-on-surface truncate">Alex Vesper</p>
-            <p className="text-[10px] text-outline uppercase tracking-wider truncate">Master Curator</p>
+            <p className="text-sm font-bold text-on-surface truncate">{user?.name || 'Admin'}</p>
+            <p className="text-[10px] text-outline uppercase tracking-wider truncate">{user?.email || 'admin@parfume.id'}</p>
           </div>
         </div>
       </div>

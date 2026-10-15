@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Collection() {
   const { addToCart } = useStore();
@@ -88,12 +89,21 @@ export default function Collection() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto px-6 pt-8 pb-32">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="max-w-[1400px] mx-auto px-6 pt-8 pb-32"
+    >
       <header className="mb-8 border-b border-outline-variant/10 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <h1 className="text-4xl font-headline font-bold mb-2 text-white">Katalog Produk</h1>
           <p className="text-on-surface-variant text-sm">Menampilkan {filteredProducts.length} parfum dari koleksi kami</p>
-        </div>
+        </motion.div>
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -118,7 +128,12 @@ export default function Collection() {
 
       <div className="flex flex-col md:flex-row gap-8 items-start relative">
         {/* Sidebar Filter */}
-        <aside className={`w-full md:w-64 flex-shrink-0 transition-all duration-300 md:sticky md:top-24 ${isSidebarOpen ? 'block' : 'hidden md:block'}`}>
+        <motion.aside 
+           initial={{ opacity: 0, x: -30 }}
+           animate={{ opacity: 1, x: 0 }}
+           transition={{ duration: 0.5, delay: 0.2 }}
+           className={`w-full md:w-64 flex-shrink-0 transition-all duration-300 md:sticky md:top-24 ${isSidebarOpen ? 'block' : 'hidden md:block'}`}
+        >
           <div className="glass-card rounded-2xl p-6 border border-outline-variant/20 flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <h2 className="font-headline font-bold text-lg flex items-center gap-2">
@@ -201,7 +216,7 @@ export default function Collection() {
               Reset Filter
             </button>
           </div>
-        </aside>
+        </motion.aside>
 
         <main className="flex-1 w-full">
           {isLoading ? (
@@ -209,9 +224,30 @@ export default function Collection() {
               <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : currentItems.length > 0 ? (
-            <div className={`grid grid-cols-1 sm:grid-cols-2 ${isSidebarOpen ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6 transition-all`}>
-              {currentItems.map((product: any) => (
-                <Link to={`/product/${product.id}`} key={product.id} className="glass-card group rounded-3xl overflow-hidden flex flex-col transition-all hover:scale-[1.02] text-left border border-outline-variant/10 hover:border-primary/30">
+            <motion.div 
+              layout
+              className={`grid grid-cols-1 sm:grid-cols-2 ${isSidebarOpen ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6 transition-all`}
+              variants={{
+                hidden: { opacity: 0 },
+                show: { opacity: 1, transition: { staggerChildren: 0.08 } }
+              }}
+              initial="hidden"
+              animate="show"
+              key={currentPage + "-" + isSidebarOpen}
+            >
+              <AnimatePresence mode="popLayout">
+                {currentItems.map((product: any) => (
+                  <motion.div
+                    layout
+                    key={product.id}
+                    variants={{
+                      hidden: { opacity: 0, scale: 0.8, y: 30 },
+                      show: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+                    }}
+                    exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                    className="h-full"
+                  >
+                    <Link to={`/product/${product.id}`} className="h-full glass-card group rounded-3xl overflow-hidden flex flex-col transition-all hover:scale-[1.03] hover:-translate-y-2 text-left border border-outline-variant/10 hover:border-primary/50 hover:shadow-[0_8px_30px_rgba(201,168,76,0.2)]">
                   <div className="relative aspect-square overflow-hidden bg-surface-container-high">
                     <img className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${product.status === 'SOLD OUT' ? 'grayscale' : ''}`} alt={product.name} src={product.mainImage || "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80"} />
                     
@@ -242,8 +278,10 @@ export default function Collection() {
                     </div>
                   </div>
                 </Link>
+              </motion.div>
               ))}
-            </div>
+            </AnimatePresence>
+            </motion.div>
           ) : (
             <div className="flex flex-col items-center justify-center py-32 text-center border border-dashed border-outline-variant/20 rounded-3xl glass-card">
               <span className="material-symbols-outlined text-6xl text-outline-variant mb-4">search_off</span>
@@ -285,6 +323,6 @@ export default function Collection() {
           )}
         </main>
       </div>
-    </div>
+    </motion.div>
   );
 }

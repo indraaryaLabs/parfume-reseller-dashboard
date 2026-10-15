@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { apiClient } from '../../lib/api-client';
 
 export default function AdminAddProduct() {
   const navigate = useNavigate();
@@ -18,10 +19,11 @@ export default function AdminAddProduct() {
     price: '',
     costPrice: '',
     stock: '',
+    category: 'Fresh',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD8DSSdK7FjpVpN6Cz2sg-rmN9WnCcKMY1pSrcg6gKmefRSkE8ydMADxzM0z-RPbqGUyjuQAq-5UwPtMnrrZ5Ct9WCp2c9MtigO6KQJtoxx_OfEoNao8QYQaTh2oYniIgL_YuJiCvqz_eh3KT5gqId5BfcZXF7gl63r0GYM4Rkee2zuHfo1hCyqECEJ_uz8UAeySHkcCYPDpwwSa8ES1Not-AXOp9Lj4NBqihK4CbDbF_sULSAe8LMjEd5R0Otc2c8VLL_HBvRCk2_n'
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -41,7 +43,7 @@ export default function AdminAddProduct() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic Validation
@@ -52,13 +54,44 @@ export default function AdminAddProduct() {
 
     setIsSubmitting(true);
 
-    // Simulate network latency / API request
-    setTimeout(() => {
-      setIsSubmitting(false);
-      // In a real app we'd save to DB here. For now we just alert and navigate.
+    try {
+      // Send product data to the API
+      const productPayload = {
+        name: formData.name,
+        brand: formData.brand,
+        description: formData.description || null,
+        topNotes: formData.topNotes || null,
+        midNotes: formData.midNotes || null,
+        baseNotes: formData.baseNotes || null,
+        longevity: Number(formData.longevity),
+        projection: Number(formData.projection),
+        price: parseInt(formData.price),
+        costPrice: formData.costPrice ? parseInt(formData.costPrice) : null,
+        stock: parseInt(formData.stock),
+        category: formData.category || null,
+        status: parseInt(formData.stock) > 0 ? 'READY STOCK' : 'SOLD OUT',
+      };
+
+      const res = await apiClient.post('/products', productPayload);
+      const createdProduct = res.data;
+
+      // Also add the image if we have a valid URL (not a blob)
+      if (formData.image && !formData.image.startsWith('blob:')) {
+        await apiClient.post(`/products/${createdProduct.id}/images`, {
+          url: formData.image,
+          sortOrder: 0,
+        });
+      }
+
       alert(`Produk "${formData.name}" berhasil ditambahkan ke katalog!`);
       navigate('/admin/products');
-    }, 1500);
+    } catch (err: any) {
+      console.error('Failed to create product:', err);
+      const message = err?.response?.data?.error || err.message || 'Gagal menambahkan produk';
+      alert(`Error: ${message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Format currency securely

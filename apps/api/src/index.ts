@@ -14,6 +14,10 @@ import financeRoutes from './routes/finance.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import adminSettingsRoutes from './routes/admin-settings.routes.js';
 import userSettingsRoutes from './routes/user-settings.routes.js';
+import { requireAuth } from './middleware/auth.js';
+import { db } from './db/index.js';
+import { userProfile } from './db/schema.js';
+import { eq } from 'drizzle-orm';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,7 +25,11 @@ const PORT = process.env.PORT || 3001;
 // ── Middleware ────────────────────────────────────
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+    ],
     credentials: true,
   })
 );
@@ -30,6 +38,21 @@ app.use(express.json());
 // ── Health Check ─────────────────────────────────
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// ── Current User endpoint ────────────────────────
+app.get('/api/me', requireAuth, async (req, res) => {
+  try {
+    const profile = await db.query.userProfile.findFirst({
+      where: eq(userProfile.userId, req.user!.id),
+    });
+    res.json({
+      user: req.user,
+      role: profile?.role || 'customer',
+    });
+  } catch {
+    res.json({ user: req.user, role: 'customer' });
+  }
 });
 
 // ── Routes ───────────────────────────────────────

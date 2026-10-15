@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { authClient } from '../lib/auth-client';
+import { motion } from 'framer-motion';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +27,28 @@ export default function Login() {
     setIsLoading(false);
     
     if (signInError) {
-      setError(signInError.message || 'Login failed');
+      const msg = signInError.message || '';
+      if (msg.includes('credential') || msg.includes('password') || msg.includes('Invalid')) {
+        setError('Email atau kata sandi salah. Silakan coba lagi.');
+      } else if (msg.includes('not found') || msg.includes('user')) {
+        setError('Akun tidak ditemukan. Silakan daftar terlebih dahulu.');
+      } else {
+        setError(msg || 'Login gagal. Silakan coba lagi.');
+      }
     } else {
+      // Check user role and redirect accordingly
+      try {
+        const res = await fetch('/api/me', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.role === 'admin') {
+            navigate('/admin');
+            return;
+          }
+        }
+      } catch {
+        // ignore, just go to home
+      }
       navigate('/');
     }
   };
@@ -47,8 +69,13 @@ export default function Login() {
         />
       </div>
 
-      <div className="relative z-20 w-full max-w-6xl px-6 py-12 flex flex-col md:flex-row items-center gap-12 lg:gap-24">
-        <div className="w-full md:w-1/2 space-y-8">
+      <div className="relative z-20 w-full max-w-6xl px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full md:w-1/2 space-y-8"
+        >
           <div className="space-y-4">
             <span className="inline-block px-4 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-[10px] uppercase tracking-[0.3em] font-semibold">
               The Essence of Darkness
@@ -74,9 +101,14 @@ export default function Login() {
               <div className="text-[10px] uppercase tracking-wider text-on-surface-variant">Eksklusif</div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="w-full md:w-[480px]">
+        <motion.div 
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          className="w-full md:w-[480px] shrink-0"
+        >
           <div className="glass-card p-10 lg:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[80px] rounded-full"></div>
             <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-secondary/10 blur-[80px] rounded-full"></div>
@@ -104,9 +136,9 @@ export default function Login() {
                   <label className="block text-[10px] uppercase tracking-widest font-semibold text-primary ml-1">Kata Sandi</label>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">lock</span>
-                    <input className="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary/50 rounded-2xl py-4 pl-12 pr-4 text-on-surface placeholder:text-on-surface-variant/40 transition-all" placeholder="••••••••" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
-                    <button className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors" type="button">
-                      <span className="material-symbols-outlined text-lg">visibility</span>
+                    <input className="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary/50 rounded-2xl py-4 pl-12 pr-12 text-on-surface placeholder:text-on-surface-variant/40 transition-all" placeholder="••••••••" type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required />
+                    <button onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer" type="button" title={showPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'}>
+                      <span className="material-symbols-outlined text-lg">{showPassword ? 'visibility_off' : 'visibility'}</span>
                     </button>
                   </div>
                 </div>
@@ -154,7 +186,7 @@ export default function Login() {
             <span>•</span>
             <Link to="#" className="hover:text-primary transition-colors">Syarat & Ketentuan</Link>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <div className="fixed bottom-8 left-8 hidden lg:block z-30">

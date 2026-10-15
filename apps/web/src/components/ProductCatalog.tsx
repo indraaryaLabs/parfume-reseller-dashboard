@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
+import { motion } from 'framer-motion';
 
 export default function ProductCatalog() {
   const { addToCart } = useStore();
@@ -49,10 +50,15 @@ export default function ProductCatalog() {
     <section className="py-20 px-6 max-w-screen-2xl mx-auto">
       {/* Category Tabs */}
       <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-        <div>
+        <motion.div
+           initial={{ opacity: 0, x: -20 }}
+           whileInView={{ opacity: 1, x: 0 }}
+           viewport={{ once: true }}
+           transition={{ duration: 0.6 }}
+        >
           <h2 className="font-headline text-4xl font-bold mb-4">Katalog <span className="text-primary">Eksklusif</span></h2>
           <p className="text-on-surface-variant">Pilih dari koleksi terbaik yang tersedia saat ini.</p>
-        </div>
+        </motion.div>
         <div className="flex p-1.5 bg-surface-container rounded-full border border-outline-variant/20 overflow-x-auto scrollbar-hide">
           <button 
             onClick={() => setActiveTab('Ready Stock')}
@@ -81,9 +87,28 @@ export default function ProductCatalog() {
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.1 }
+            }
+          }}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           {filteredProducts.map((product: any) => (
-            <Link to={`/product/${product.id}`} key={product.id} className="glass-card group rounded-3xl overflow-hidden flex flex-col transition-all hover:-translate-y-2 block text-left">
+            <motion.div 
+              key={product.id}
+              variants={{
+                hidden: { opacity: 0, y: 30 },
+                show: { opacity: 1, y: 0, transition: { type: "spring", bounce: 0.4 } }
+              }}
+            >
+              <Link to={`/product/${product.id}`} className="glass-card group rounded-3xl overflow-hidden flex flex-col transition-all hover:scale-[1.02] hover:-translate-y-1 block text-left h-full">
               <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-high">
                 <img 
                   className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${product.status === 'SOLD OUT' ? 'grayscale' : ''}`} 
@@ -123,8 +148,9 @@ export default function ProductCatalog() {
                 </div>
               </div>
             </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-outline-variant/20 rounded-3xl glass-card">
           <span className="material-symbols-outlined text-6xl text-outline-variant mb-4">search_off</span>
